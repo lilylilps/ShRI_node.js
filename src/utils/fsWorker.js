@@ -1,4 +1,5 @@
 const fs = require('fs');
+const config = require('../config/config')
 
 class FsWorker {
     constructor(path) {
@@ -18,5 +19,5 @@ class FsWorker {
     }
 }
 
-const fsWorker = new FsWorker('./uploads');
+const fsWorker = new FsWorker(config.uploadDir);
 module.exports = fsWorker;

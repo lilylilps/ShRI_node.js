@@ -10,9 +10,6 @@ class Database extends EventEmitter {
 
     getAll() {
         let allImages = Object.values(this.images);
-
-        // allSvgs.sort((svgA, svgB) => svgB.createdAt - svgA.createdAt);
-
         return allImages;
     }
 
@@ -35,10 +32,6 @@ class Database extends EventEmitter {
     insert(image) {
         this.images[image.id] = image;
     }
-
-    // exists(imgId) {
-    //     return imgId in this.images;
-    // }
 }
 
 const database = new Database();

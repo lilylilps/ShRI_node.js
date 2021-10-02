@@ -2,6 +2,7 @@ const express = require('express');
 const database = require('./entities/database');
 const Image = require('./entities/image');
 const fsWorker = require('./utils/fsWorker');
+const config = require('./config/config')
 
 const multer = require('multer');
 const storage = multer.memoryStorage();
@@ -16,7 +17,7 @@ app.use(express.json());
 app.get('/list', (req, res) => {
     const allImages = database.getAll().map((image) => image.toPublicJSON());
 
-    return res.json({ allImages });
+    return res.json(allImages);
 });
 
 app.get('/image/:id', (req, res) => {
@@ -28,11 +29,9 @@ app.get('/image/:id', (req, res) => {
 
     const image = database.getImage(imgId);
 
-    res.setHeader('Content-Type', `${image.contentType}`);
-    // res.setHeader('Content-Disposition', `attachment; filename=${image.originalName}`);
-
     const stream = fsWorker.getReadFileStream(image.id);
 
+    res.setHeader('Content-Type', `${image.contentType}`);
     return stream.pipe(res);
 });
 
@@ -42,7 +41,7 @@ app.get('/merge', (req, res) => {
     const color = req.query.color;
     const threshold = req.query.threshold;
 
-    if (!imgFrontId || !imgBackId || !color || !threshold) {
+    if (!imgFrontId || !imgBackId) {
         return res.sendStatus(400);
     } else if (!database.getImage(imgFrontId) || !database.getImage(imgBackId)) {
         return res.sendStatus(404);
@@ -52,14 +51,14 @@ app.get('/merge', (req, res) => {
     const imgBack = fsWorker.getReadFileStream(imgBackId);
 
     replaceBackground(imgFront, imgBack, color.split(','), threshold)
-    .then(
-        (readableStream) => {
-            return readableStream.pipe(res);
-        }
-    )
-    .catch(() => {
-        res.sendStatus(400);
-    })
+        .then(
+            (readableStream) => {
+                return readableStream.pipe(res);
+            }
+        )
+        .catch(() => {
+            res.sendStatus(400);
+        })
 });
 
 app.post('/upload', upload.single('image'), async (req, res) => {
@@ -73,7 +72,6 @@ app.post('/upload', upload.single('image'), async (req, res) => {
 });
 
 app.delete('/image/:id', async (req, res) => {
-
     const imgId = req.params.id;
 
     if (!database.getImage(imgId)) {
@@ -87,8 +85,6 @@ app.delete('/image/:id', async (req, res) => {
     res.sendStatus(200);
 });
 
-const PORT = 8080;
-
-app.listen(PORT, () => {
-    console.log(`Server started on port ${PORT}`);
+app.listen(config.port, () => {
+    console.log(`Server started on port ${config.port}`);
 });
