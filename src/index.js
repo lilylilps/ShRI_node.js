@@ -53,6 +53,7 @@ app.get('/merge', (req, res) => {
     replaceBackground(imgFront, imgBack, color.split(','), threshold)
         .then(
             (readableStream) => {
+                res.setHeader('Content-Type', 'image/jpeg');
                 return readableStream.pipe(res);
             }
         )
@@ -83,6 +84,7 @@ app.delete('/image/:id', async (req, res) => {
     fsWorker.removeFile(imgId);
 
     res.sendStatus(200);
+    return res.json({ id: imgId });
 });
 
 app.listen(config.port, () => {
