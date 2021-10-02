@@ -67,7 +67,7 @@ app.post('/upload', upload.single('image'), async (req, res) => {
     const image = new Image(null, content.size, null, content.mimetype);
     database.insert(image);
 
-    fsWorker.writeFile(image.id, content.buffer);
+    await fsWorker.writeFile(image.id, content.buffer);
 
     return res.json({ id: image.id });
 });
@@ -81,9 +81,8 @@ app.delete('/image/:id', async (req, res) => {
 
     database.remove(imgId);
 
-    fsWorker.removeFile(imgId);
+    await fsWorker.removeFile(imgId);
 
-    res.sendStatus(200);
     return res.json({ id: imgId });
 });
 
